@@ -1,0 +1,4 @@
+*.gem
+*.swp
+*.swo
+.DS_Store
