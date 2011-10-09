@@ -38,8 +38,12 @@ module Familiar
     end
   end
 
-  def self.fn(p)
-    Fn.new &p
+  def self.fn(p = nil, &code)
+    if block_given?
+      Fn.new &code
+    else
+      Fn.new &p
+    end 
   end
 
   #############################################################################

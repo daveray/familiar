@@ -2,6 +2,8 @@ Want to use Clojure's persistent, lazy data structures and concurrency primitive
 
 Use the Clojure runtime from Ruby, JRuby in particular.
 
+_My Ruby-meta-fu isn't that strong. Suggestions welcome._
+
 # Usage
 
     require 'familiar'
@@ -15,6 +17,17 @@ becomes:
     Familiar.hash_map "a", 1, "b" 2
 
 Some functions have additional Ruby sugar. See below.
+
+# Functions
+Make a function from a proc or lambda:
+
+    irb> Familiar.fn(lambda {|v| v * 2}).invoke(4)
+    => 8
+
+or just a block:
+
+    irb> Familiar.fn {|v| v * 2}.invoke(4)
+    => 8
 
 # Persistent data structures
 
@@ -73,4 +86,22 @@ Here's how you can make a lazy sequence
         end
       end
     end
+
+Use `clojure.core/reduce` to convert to a Ruby vector:
+
+    irb> Familiar.reduce Familiar.fn {|acc,v| acc << v}, [], Familiar.range(5)
+    => [0, 1, 2, 3, 4]
+
+# Futures
+
+Make a future:
+
+    f = Familiar.future do
+      puts "I'm run on some other thread and return a value later"
+      "return value"
+    end
+
+    ...
+
+    f.get -> "return value"
 

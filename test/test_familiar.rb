@@ -3,7 +3,18 @@ require 'familiar'
 
 class FamiliarAtomTest < Test::Unit::TestCase
 
-  # familiar.rb
+  def test_can_create_a_function_from_a_lambda
+    f = Familiar.fn(lambda {|x| x * 2 })
+    assert f.is_a? Java::clojure.lang.IFn
+    assert_equal 8, f.invoke(4)
+  end
+
+  def test_can_create_a_function_from_a_block
+    f = Familiar.fn {|x| x * 2 }
+    assert f.is_a? Java::clojure.lang.IFn
+    assert_equal 8, f.invoke(4)
+  end
+
   def test_can_create_a_list
     input = (1..100).to_a
     a = Familiar.list(*input)
