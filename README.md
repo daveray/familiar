@@ -1,8 +1,8 @@
+_My Ruby-meta-fu isn't that strong. In fact, this might be a terrible idea. Suggestions welcome._
+
 Want to use Clojure's persistent, lazy data structures and concurrency primitives, but afraid of parentheses? Try it from Ruby.
 
-Use the Clojure runtime from Ruby, JRuby in particular.
-
-_My Ruby-meta-fu isn't that strong. Suggestions welcome._
+Tested on JRuby 1.6.4 with Clojure 1.3.0.
 
 # Usage
 
