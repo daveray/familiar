@@ -1,7 +1,7 @@
 require 'test/unit'
 require 'familiar'
 
-class FamiliarAtomTest < Test::Unit::TestCase
+class FamiliarTest < Test::Unit::TestCase
 
   def test_can_create_a_function_from_a_lambda
     f = Familiar.fn(lambda {|x| x * 2 })

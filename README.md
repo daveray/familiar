@@ -18,6 +18,13 @@ becomes:
 
 Some functions have additional Ruby sugar. See below.
 
+Use `Familiar.with` if you don't feel like writing `Familiar` over and over:
+
+    Familiar.with do
+      reduce fn {|acc,v| acc + v}, 0, range(100)
+    end
+    => 4950
+
 # Functions
 Make a function from a proc or lambda:
 
@@ -104,4 +111,22 @@ Make a future:
     ...
 
     f.get -> "return value"
+
+# Examples
+
+    # Primes example from clojure docs
+    # http://clojuredocs.org/clojure_core/clojure.core/reduce
+    x = Familiar.with do
+      reduce fn { |primes,number|
+              if some(vars.zero?, map(fn {|x| number % x}, primes))
+                primes
+              else
+                conj(primes, number)
+              end
+            },
+            vector(2),
+            take(100, iterate(vars.inc, 3))
+    end
+    Familiar.println x
+    => [2 3 5 7 11 13 17 19 23 29 31 ... 67 71 73 79 83 89 97 101]
 
