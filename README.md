@@ -130,3 +130,8 @@ Make a future:
     Familiar.println x
     => [2 3 5 7 11 13 17 19 23 29 31 ... 67 71 73 79 83 89 97 101]
 
+## License
+
+Copyright (C) 2011 Dave Ray
+
+Distributed under the Eclipse Public License.
