@@ -238,6 +238,40 @@ module Familiar
     Java::clojure.lang.Agent.soloExecutor.submit(Callable.new(code))
   end
 
+  #############################################################################
+  # REPL
+  if $0 != __FILE__
+    Familiar.with do
+      self.require symbol("clojure.repl")
+    end
+
+    def self.find_doc(s)
+      self["clojure.repl", :find_doc].invoke(s)
+    end
+
+    # Print docs for he given string, symbol, etc.
+    #
+    # Examples:
+    #
+    #   > Familiar.doc :reduce
+    #   ... prints docs for clojure.core/reduce ...
+    #
+    #   > Familiar.doc "clojure.repl/source"
+    #   ... prints docs for clojure.repl/source ...
+    def self.doc(s)
+      self.with do
+        Familiar.eval read_string("(clojure.repl/doc #{s})")
+      end
+    end
+
+    # Same as Familiar.doc, but prints the *source code* for the given
+    # input.
+    def self.source(s)
+      self.with do
+        Familiar.eval read_string("(clojure.repl/source #{s})")
+      end
+    end
+  end
 end
 
 
