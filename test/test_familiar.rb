@@ -13,6 +13,34 @@ require 'familiar'
 
 class FamiliarTest < Test::Unit::TestCase
 
+  def test_to_s_looks_right
+    assert_equal '(1 2 3 4 5)', Familiar.list(1, 2, 3, 4, 5).to_s
+    assert_equal '[1 2 3 4 5]', Familiar.vector(1, 2, 3, 4, 5).to_s
+    assert_equal '{1 2, 3 4, 5 6}', Familiar.hash_map(1, 2, 3, 4, 5, 6).to_s
+    assert_equal '#{1 2 3 4 5}', Familiar.hash_set(1, 2, 3, 4, 5).to_s
+    assert_equal 'hi', Familiar.symbol("hi").to_s
+    assert_equal ':hi', Familiar.keyword("hi").to_s
+    assert Familiar.range(4).to_s =~ /^clojure\.lang\.LazySeq@\h+$/
+    assert Familiar.atom('hi').to_s =~ /^clojure\.lang\.Atom@\h+$/
+    assert Familiar.ref('hi').to_s =~ /^clojure\.lang\.Ref@\h+$/
+    assert Familiar.agent('hi').to_s =~ /^clojure\.lang\.Agent@\h+$/
+    assert Familiar.vars.identity.to_s =~ /^#'clojure\.core\/identity$/
+  end
+
+  def test_inspect_looks_right
+    assert_equal '(1 2 3 4 5)', Familiar.list(1, 2, 3, 4, 5).inspect
+    assert_equal '[1 2 3 4 5]', Familiar.vector(1, 2, 3, 4, 5).inspect
+    assert_equal '{1 2, 3 4, 5 6}', Familiar.hash_map(1, 2, 3, 4, 5, 6).inspect
+    assert_equal '#{1 2 3 4 5}', Familiar.hash_set(1, 2, 3, 4, 5).inspect
+    assert_equal 'hi', Familiar.symbol("hi").inspect
+    assert_equal ':hi', Familiar.keyword("hi").inspect
+    assert_equal '(0 1 2 3)', Familiar.range(4).inspect
+    assert Familiar.atom('hi').inspect =~ /^#<Atom@\h+: "hi">$/
+    assert Familiar.ref('hi').inspect =~ /^#<Ref@\h+: "hi">$/
+    assert Familiar.agent('hi').inspect =~ /^#<Agent@\h+: "hi">$/
+    assert Familiar.vars.identity.inspect =~ /^#'clojure\.core\/identity$/
+  end
+
   def test_can_create_a_function_from_a_lambda
     f = Familiar.fn(lambda {|x| x * 2 })
     assert f.is_a? Java::clojure.lang.IFn

@@ -23,7 +23,6 @@ module Familiar
     end
   end
 
-
   # Provides access to Clojure vars for when you need to use a Clojure
   # var without invoking it.
   #
@@ -47,6 +46,29 @@ module Familiar
     end
   end
 
+  # Make inspect and to_s look right in irb
+  [Java::ClojureLang::LazySeq,
+   Java::ClojureLang::PersistentVector,
+   Java::ClojureLang::PersistentList,
+   Java::ClojureLang::PersistentArrayMap,
+   Java::ClojureLang::PersistentHashMap,
+   Java::ClojureLang::PersistentHashSet,
+   Java::ClojureLang::Symbol,
+   Java::ClojureLang::Keyword,
+   Java::ClojureLang::Atom,
+   Java::ClojureLang::Ref,
+   Java::ClojureLang::Agent,
+   Java::ClojureLang::Var
+   ].each do |x|
+    x.class_eval do
+      def to_s
+        self.to_string
+      end
+      def inspect
+        Familiar.pr_str self
+      end
+    end
+  end
 
   # Run a block of code without having to qualify everything in this module:
   #
