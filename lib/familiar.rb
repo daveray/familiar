@@ -47,7 +47,8 @@ module Familiar
   end
 
   # Make inspect and to_s look right in irb
-  [Java::ClojureLang::LazySeq,
+  [
+   #Java::ClojureLang::LazySeq,
    Java::ClojureLang::PersistentVector,
    Java::ClojureLang::PersistentList,
    Java::ClojureLang::PersistentArrayMap,
@@ -67,6 +68,14 @@ module Familiar
         self.to_string
       end
       def inspect
+        Familiar.pr_str self
+      end
+    end
+  end
+
+  [ Java::ClojureLang::LazySeq ].each do |x|
+    x.class_eval do
+      def inspect!
         Familiar.pr_str self
       end
     end

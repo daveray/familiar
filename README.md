@@ -25,6 +25,25 @@ Use `Familiar.with` if you don't feel like writing `Familiar` over and over:
     end
     => 4950
 
+# A note on IRB Usage
+Most Clojure datastructes (maps, sets, etc) will print out in IRB the same as in the Clojure REPL. The one difference is that lazy sequences will never print out automatically. This is because IRB will always try to print the result of the last expression so something like this:
+
+    
+    irb(main):001:0> x = Familiar.repeatedly Familiar.vars.rand
+
+will lock up IRB as it tries to print the infinite sequence. The Clojure REPL, on the other hand, doesn't try to print the value of a newly `def'd` var so you don't have this problem.
+
+So, to inspect the value of a *finite* lazy sequence in IRB, use the `inspect!` method:
+
+    irb(main):001:0> f = Familiar
+    => Familiar
+    irb(main):002:0> x = f.repeatedly f.vars.rand
+    => #<Java::ClojureLang::LazySeq:0x4ab3a5d1>
+    irb(main):003:0> f.take(2, x)
+    => #<Java::ClojureLang::LazySeq:0x7361b0bc>
+    irb(main):004:0> f.take(2, x).inspect!
+    => "(0.5428756368923673 0.598041516780956)"
+
 # Functions
 Make a function from a proc or lambda:
 
