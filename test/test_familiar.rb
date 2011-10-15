@@ -25,6 +25,7 @@ class FamiliarTest < Test::Unit::TestCase
     assert Familiar.ref('hi').to_s =~ /^clojure\.lang\.Ref@\h+$/
     assert Familiar.agent('hi').to_s =~ /^clojure\.lang\.Agent@\h+$/
     assert Familiar.vars.identity.to_s =~ /^#'clojure\.core\/identity$/
+    assert_equal '(1 2 3)', Familiar.cons(1, Familiar.list(2, 3)).to_s
   end
 
   def test_inspect_looks_right
@@ -39,6 +40,7 @@ class FamiliarTest < Test::Unit::TestCase
     assert Familiar.ref('hi').inspect =~ /^#<Ref@\h+: "hi">$/
     assert Familiar.agent('hi').inspect =~ /^#<Agent@\h+: "hi">$/
     assert Familiar.vars.identity.inspect =~ /^#'clojure\.core\/identity$/
+    assert_equal '(1 2 3)', Familiar.cons(1, Familiar.list(2, 3)).inspect
   end
 
   def test_can_create_a_function_from_a_lambda
