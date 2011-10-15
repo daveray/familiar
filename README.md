@@ -25,11 +25,18 @@ Use `Familiar.with` if you don't feel like writing `Familiar` over and over:
     end
     => 4950
 
+The `Familiar` module defines `[ns, var]` and `[var]` methods for getting vars directly. This necessary if you want to pass an existing Clojure function to a higher-order function, e.g.
+
+    Familiar.with do
+      map self[:inc], vector(2, 4, 6)
+    end
+    => (3, 5, 7)
+
 # A note on IRB Usage
 Most Clojure datastructes (maps, sets, etc) will print out in IRB the same as in the Clojure REPL. The one difference is that lazy sequences will never print out automatically. This is because IRB will always try to print the result of the last expression so something like this:
 
     
-    irb(main):001:0> x = Familiar.repeatedly Familiar.vars.rand
+    irb(main):001:0> x = Familiar.repeatedly Familiar[:rand]
 
 will lock up IRB as it tries to print the infinite sequence. The Clojure REPL, on the other hand, doesn't try to print the value of a newly `def'd` var so you don't have this problem.
 
@@ -37,7 +44,7 @@ So, to inspect the value of a *finite* lazy sequence in IRB, use the `inspect!` 
 
     irb(main):001:0> f = Familiar
     => Familiar
-    irb(main):002:0> x = f.repeatedly f.vars.rand
+    irb(main):002:0> x = f.repeatedly f[:rand]
     => #<Java::ClojureLang::LazySeq:0x4ab3a5d1>
     irb(main):003:0> f.take(2, x)
     => #<Java::ClojureLang::LazySeq:0x7361b0bc>
@@ -137,14 +144,14 @@ Make a future:
     # http://clojuredocs.org/clojure_core/clojure.core/reduce
     x = Familiar.with do
       reduce fn { |primes,number|
-              if some(vars.zero?, map(fn {|x| number % x}, primes))
+              if some(self[:zero?], map(fn {|x| number % x}, primes))
                 primes
               else
                 conj(primes, number)
               end
             },
             vector(2),
-            take(100, iterate(vars.inc, 3))
+            take(100, iterate(self[:inc], 3))
     end
     Familiar.println x
     => [2 3 5 7 11 13 17 19 23 29 31 ... 67 71 73 79 83 89 97 101]

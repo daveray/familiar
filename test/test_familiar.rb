@@ -24,7 +24,7 @@ class FamiliarTest < Test::Unit::TestCase
     assert Familiar.atom('hi').to_s =~ /^clojure\.lang\.Atom@\h+$/
     assert Familiar.ref('hi').to_s =~ /^clojure\.lang\.Ref@\h+$/
     assert Familiar.agent('hi').to_s =~ /^clojure\.lang\.Agent@\h+$/
-    assert Familiar.vars.identity.to_s =~ /^#'clojure\.core\/identity$/
+    assert Familiar[:identity].to_s =~ /^#'clojure\.core\/identity$/
     assert_equal '(1 2 3)', Familiar.cons(1, Familiar.list(2, 3)).to_s
     assert_equal '(1 2 3 4)', Familiar.rest(Familiar.range(5)).to_s
   end
@@ -39,13 +39,21 @@ class FamiliarTest < Test::Unit::TestCase
     assert Familiar.atom('hi').inspect =~ /^#<Atom@\h+: "hi">$/
     assert Familiar.ref('hi').inspect =~ /^#<Ref@\h+: "hi">$/
     assert Familiar.agent('hi').inspect =~ /^#<Agent@\h+: "hi">$/
-    assert Familiar.vars.identity.inspect =~ /^#'clojure\.core\/identity$/
+    assert Familiar[:identity].inspect =~ /^#'clojure\.core\/identity$/
     assert_equal '(1 2 3)', Familiar.cons(1, Familiar.list(2, 3)).inspect
     assert_equal '(1 2 3 4)', Familiar.rest(Familiar.range(5)).inspect
   end
 
   def test_can_force_lazyseqs_with_inspect!
     assert_equal '(0 1 2 3)', Familiar.range(4).inspect!
+  end
+
+  def test_can_get_vars_from_other_namespaces
+    f = Familiar
+    f.require f.symbol("clojure.set")
+    union = f["clojure.set", :union]
+    assert union
+    assert_equal f.hash_set(1, 2, 3), union.invoke(f.hash_set(1, 2), f.hash_set(3, 2))
   end
 
   def test_can_create_a_function_from_a_lambda

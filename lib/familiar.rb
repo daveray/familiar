@@ -12,33 +12,52 @@ require "java"
 require "clojure-1.3.0.jar"
 
 module Familiar
+  # TODO why do I have this again?
   module Vars
-    def self.__lookup(ns, var)
+    def self.[] (ns, var)
       m = Java::clojure.lang.RT.var(ns, var.to_s.gsub("_", "-"))
       m.is_bound? ? m : nil
     end
 
     def self.method_missing(meth, *args, &block)
-      __lookup("clojure.core", meth) or super
+      self["clojure.core", meth] or super
     end
   end
 
   # Provides access to Clojure vars for when you need to use a Clojure
   # var without invoking it.
   #
-  # Example:
+  # Given a single argument, it's treated as a var in clojure.core. Two
+  # argument form allows a particular namespace to be referenced.
+  #
+  # Examples:
+  #
+  #   Familiar[:inc]
+  #   => #'clojure.core/inc
+  #
+  #   Familiar["clojure.set", :union]
+  #   => #'clojure.set/union
   #
   #   Familiar.with do
-  #     filter vars.even?, range(100)
+  #     filter self[:even?], range(100)
   #   end
   #
-  def self.vars
-    Familiar::Vars
+  #   Familiar.with do
+  #     require symbol("clojure.set")
+  #     self["clojure.set", :union].invoke(hash_set(1, 2), hash_set(2, 3))
+  #   end
+  #
+  def self.[] (ns, var = nil)
+    if not var
+      var = ns
+      ns = "clojure.core"
+    end
+    Familiar::Vars[ns, var]
   end
  
   def self.method_missing(meth, *args, &block)
     #puts "Missing #{meth}"
-    m = self.vars.send meth
+    m = self[meth]
     if m
       m.invoke(*args)
     else
