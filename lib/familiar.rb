@@ -59,7 +59,8 @@ module Familiar
    Java::ClojureLang::Ref,
    Java::ClojureLang::Agent,
    Java::ClojureLang::Var,
-   Java::ClojureLang::Cons
+   Java::ClojureLang::Cons,
+   Java::ClojureLang::ChunkedCons
    ].each do |x|
     x.class_eval do
       def to_s
