@@ -32,6 +32,14 @@ The `Familiar` module defines `[ns, var]` and `[var]` methods for getting vars d
     end
     => (3, 5, 7)
 
+Similarly, the `ns` method will return a `Familiar::NS` object which has `require` and `[var]` methods:
+
+    cs = Familiar.ns("clojure.set").require
+    cs[:union]
+    => #'clojure.set/union
+    cs.union Familiar.hash_set(1, 2), Familiar.hash_set(2, 3)
+    => #{1 2 3}
+
 # A note on IRB Usage
 Most Clojure datastructes (maps, sets, etc) will print out in IRB the same as in the Clojure REPL. The one difference is that lazy sequences will never print out automatically. This is because IRB will always try to print the result of the last expression so something like this:
 
@@ -50,6 +58,18 @@ So, to inspect the value of a *finite* lazy sequence in IRB, use the `inspect!` 
     => #<Java::ClojureLang::LazySeq:0x7361b0bc>
     irb(main):004:0> f.take(2, x).inspect!
     => "(0.5428756368923673 0.598041516780956)"
+
+# Type Conversions
+The `to_clojure` method is added to Ruby datastructures so you can easily convert from Ruby literals to Clojure persistent structures. For example, this Ruby code:
+
+    [[1, 2, 3], {"hi" => "bye", :foo => [4, 5, 6]}].to_clojure
+
+is equivalent to this Clojure code:
+
+
+    [[1 2 3] {"hi" "bye", :foo [4, 5, 6]}]
+
+Note that Ruby Symbols are converted to Clojure keywords.
 
 # Functions
 Make a function from a proc or lambda:

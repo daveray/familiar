@@ -173,5 +173,43 @@ class FamiliarTest < Test::Unit::TestCase
     assert_equal 33, r.deref
   end
 
+  def test_can_convert_a_ruby_vector_to_clojure
+    ruby = [1, 2, 3, 4]
+    clojure = ruby.to_clojure
+    assert Familiar.vector?(clojure)
+    assert_equal Familiar.vector(1, 2, 3, 4), clojure
+  end
+
+  def test_can_convert_a_ruby_hash_to_clojure
+    ruby = {"a" => "b", "c" => 99}
+    clojure = ruby.to_clojure
+    assert Familiar.map?(clojure)
+    assert_equal Familiar.hash_map("a", "b", "c", 99), clojure
+  end
+
+  def test_can_convert_a_ruby_symbol_to_clojure_keyword
+    clojure = :hello.to_clojure
+    assert Familiar.keyword?(clojure)
+    assert_equal Familiar.keyword("hello"), clojure
+  end
+
+  def test_can_convert_a_ruby_set_to_clojure_set
+    clojure = Set.new([1, 2, 3, 4]).to_clojure
+    assert Familiar.set?(clojure)
+    assert_equal Familiar.hash_set(1, 2, 3, 4), clojure
+  end
+
+  def test_recursively_converts_ruby_object_to_clojure
+    f = Familiar
+    clojure = [[1, 2, 3], {"hi" => "bye", :foo => [4, 5, 6]}].to_clojure
+    assert f.vector?(clojure)
+    # TODO it's not clear why Ruby's == is returning nil instead of true
+    # or false here.
+    #assert_equal f.vector(f.vector(1, 2, 3), f.hash_map("hi", "bye")), clojure
+    assert f.vector(f.vector(1, 2, 3), 
+                    f.hash_map("hi", "bye",
+                               f.keyword("foo"), f.vector(4, 5, 6))).equals(clojure)
+  end
+
 end
 

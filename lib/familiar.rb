@@ -11,6 +11,8 @@
 require "java"
 require "clojure-1.3.0.jar"
 
+require "set"
+
 module Familiar
   # Represents a Clojure namespace. Don't create directly. Use
   # Familiar.ns(...)
@@ -317,6 +319,43 @@ module Familiar
   # Pass a block to clojure.core/future
   def self.future(&code)
     Java::clojure.lang.Agent.soloExecutor.submit(Callable.new(code))
+  end
+
+  #############################################################################
+  # Type conversions
+  
+  def self.to_clojure(v)
+    v.respond_to?(:to_clojure) ? v.to_clojure : v
+  end
+
+  class ::Array
+    def to_clojure
+      f = Familiar
+      f.vec(f.map f.fn {|x| f.to_clojure(x)}, self)
+    end
+  end
+
+  class ::Hash
+    def to_clojure
+      f = Familiar
+      f.into f.hash_map, map {|k,v| f.vector(f.to_clojure(k), f.to_clojure(v))} 
+    end
+  end
+  
+  class ::Set
+    def to_clojure
+      r = Familiar.hash_set()
+      each do |v|
+        r = Familiar.conj r, v
+      end
+      r
+    end
+  end
+
+  class ::Symbol
+    def to_clojure
+      Familiar.keyword(to_s)
+    end
   end
 
   #############################################################################
