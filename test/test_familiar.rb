@@ -13,6 +13,13 @@ require 'familiar'
 
 class FamiliarTest < Test::Unit::TestCase
 
+  def test_can_require_a_namespace
+    f = Familiar
+    s = Familiar::NS.new("clojure.set")
+    assert s.require.nil?
+    assert_equal f.hash_set(1, 2, 3), s.union(f.hash_set(1, 2), f.hash_set(3, 2))
+  end
+
   def test_to_s_looks_right
     assert_equal '(1 2 3 4 5)', Familiar.list(1, 2, 3, 4, 5).to_s
     assert_equal '[1 2 3 4 5]', Familiar.vector(1, 2, 3, 4, 5).to_s

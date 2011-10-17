@@ -12,15 +12,33 @@ require "java"
 require "clojure-1.3.0.jar"
 
 module Familiar
-  # TODO why do I have this again?
-  module Vars
-    def self.[] (ns, var)
-      m = Java::clojure.lang.RT.var(ns, var.to_s.gsub("_", "-"))
+  # Represents a Clojure namespace.
+  class NS
+    def initialize(ns)
+      @ns = ns
+    end
+
+    # Require this namespace so functions and vars are accessible.
+    # TODO should this be automatic?
+    def require
+      Familiar["clojure.core", :require].invoke(Familiar.symbol(@ns))
+    end
+
+    # Lookup a var in this namespace
+    def [] (var)
+      m = Java::clojure.lang.RT.var(@ns, var.to_s.gsub("_", "-"))
       m.is_bound? ? m : nil
     end
 
-    def self.method_missing(meth, *args, &block)
-      self["clojure.core", meth] or super
+    # All methods calls map to calling the same var in this namespace as
+    # a function. Underscores are automatically converted to hyphens.
+    def method_missing(meth, *args, &block)
+      m = self[meth]
+      if m
+        m.invoke(*args)
+      else
+        super
+      end
     end
   end
 
@@ -52,11 +70,12 @@ module Familiar
       var = ns
       ns = "clojure.core"
     end
-    Familiar::Vars[ns, var]
+
+    # TODO cache namespaces?
+    Familiar::NS.new(ns)[var]
   end
  
   def self.method_missing(meth, *args, &block)
-    #puts "Missing #{meth}"
     m = self[meth]
     if m
       m.invoke(*args)
@@ -66,9 +85,7 @@ module Familiar
   end
 
   # Make inspect and to_s look right in irb
-  [
-   #Java::ClojureLang::LazySeq,
-   Java::ClojureLang::PersistentVector,
+  [Java::ClojureLang::PersistentVector,
    Java::ClojureLang::PersistentList,
    Java::ClojureLang::PersistentArrayMap,
    Java::ClojureLang::PersistentHashMap,
@@ -92,6 +109,7 @@ module Familiar
     end
   end
 
+  # LazySeq gets special treatment to avoid killing IRB with infinite seqs.
   [ Java::ClojureLang::LazySeq ].each do |x|
     x.class_eval do
       def inspect!
