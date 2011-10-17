@@ -16,7 +16,7 @@ class FamiliarTest < Test::Unit::TestCase
   def test_can_require_a_namespace
     f = Familiar
     s = Familiar::NS.new("clojure.set")
-    assert s.require.nil?
+    assert_equal s, s.require
     assert_equal f.hash_set(1, 2, 3), s.union(f.hash_set(1, 2), f.hash_set(3, 2))
   end
 
@@ -58,7 +58,7 @@ class FamiliarTest < Test::Unit::TestCase
   def test_can_get_vars_from_other_namespaces
     f = Familiar
     f.require f.symbol("clojure.set")
-    union = f["clojure.set", :union]
+    union = f.ns("clojure.set")[:union]
     assert union
     assert_equal f.hash_set(1, 2, 3), union.invoke(f.hash_set(1, 2), f.hash_set(3, 2))
   end

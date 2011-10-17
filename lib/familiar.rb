@@ -12,7 +12,14 @@ require "java"
 require "clojure-1.3.0.jar"
 
 module Familiar
-  # Represents a Clojure namespace.
+  # Represents a Clojure namespace. Don't create directly. Use
+  # Familiar.ns(...)
+  #
+  # All methods calls map to calling the same var in this namespace as
+  # a function. Underscores are automatically converted to hyphens.
+  #
+  # See:
+  #   Familiar.ns()
   class NS
     def initialize(ns)
       @ns = ns
@@ -20,11 +27,24 @@ module Familiar
 
     # Require this namespace so functions and vars are accessible.
     # TODO should this be automatic?
-    def require
-      Familiar["clojure.core", :require].invoke(Familiar.symbol(@ns))
+    #
+    # Returns self
+    def require(*args)
+      #puts "Requiring #{@ns}"
+      r = Familiar[:require]
+      if args.empty?
+        r.invoke(Familiar.symbol(@ns))
+      else
+        r.invoke(*args)
+      end
+      self
     end
 
-    # Lookup a var in this namespace
+    # Lookup a var in this namespace.
+    #
+    # Examples:
+    #
+    #   Familiar.ns("clojure.java.io")[:reader]
     def [] (var)
       m = Java::clojure.lang.RT.var(@ns, var.to_s.gsub("_", "-"))
       m.is_bound? ? m : nil
@@ -33,6 +53,7 @@ module Familiar
     # All methods calls map to calling the same var in this namespace as
     # a function. Underscores are automatically converted to hyphens.
     def method_missing(meth, *args, &block)
+      #puts "Missing #{@ns}/#{meth}"
       m = self[meth]
       if m
         m.invoke(*args)
@@ -40,48 +61,89 @@ module Familiar
         super
       end
     end
+
+    # TODO This gets in the way of clojure.core/eval. One fix might be
+    # NS < BasicObject. Not sure yet.
+    undef eval
   end
 
-  # Provides access to Clojure vars for when you need to use a Clojure
-  # var without invoking it.
+  # Returns a Clojure NS by name. When given no argument, returns clojure.core.
   #
-  # Given a single argument, it's treated as a var in clojure.core. Two
-  # argument form allows a particular namespace to be referenced.
+  # This is generally useful because it provides access to Clojure vars 
+  # for when you need to use a Clojure var without invoking it. Combine
+  # with NS.[] for this effect.
+  #
+  # Returns an instance of Familiar::NS
   #
   # Examples:
   #
-  #   Familiar[:inc]
-  #   => #'clojure.core/inc
+  #   # Require a namespace
+  #   Familiar["clojure.set"].require
   #
-  #   Familiar["clojure.set", :union]
+  #   # Get the union function from clojure.set
+  #   Familiar.ns("clojure.set")[:union]
   #   => #'clojure.set/union
   #
   #   Familiar.with do
+  #     ns("clojure.set").require
+  #     ns("clojure.set").union(hash_set(1, 2), hash_set(2, 3))
+  #   end
+  #   => #{1 2 3}
+  #
+  # See:
+  #   Familiar.[]
+  def self.ns (ns)
+    # TODO cache namespaces?
+    Familiar::NS.new(ns || "clojure.core")
+  end
+
+  # Lookup a var.
+  #
+  #   [ns, var] => #'ns/var
+  #
+  #   [var] => #'clojure.core/var
+  #
+  # This is useful if you need to pass an existing Clojure function to a 
+  # higher-order function.
+  # 
+  # Note that there's significant overlap with Familiar.ns().
+  #
+  # Examples:
+  #
+  #   # Get the inc function from core
+  #   Familiar[:inc]
+  #   => #'clojure.core/inc
+  #
+  #   # Get the union function from clojure.set
+  #   Familiar["clojure.set", :union]
+  #   => #'clojure.set/union
+  #
+  #   # Pass clojure.core/even? to clojure.core/filter
+  #   Familiar.with do
   #     filter self[:even?], range(100)
   #   end
+  #   => (0 2 4 6 ...)
   #
   #   Familiar.with do
-  #     require symbol("clojure.set")
+  #     ns("clojure.set").require
   #     self["clojure.set", :union].invoke(hash_set(1, 2), hash_set(2, 3))
+  #     # ... or ...
+  #     ns("clojure.set").union(hash_set(1, 2), hash_set(2, 3))
   #   end
+  #   => #{1 2 3}
   #
-  def self.[] (ns, var = nil)
+  # See:
+  #   Familiar.ns()
+  def self.[] (ns_name, var = nil)
     if not var
-      var = ns
-      ns = "clojure.core"
+      var = ns_name
+      ns_name = "clojure.core"
     end
-
-    # TODO cache namespaces?
-    Familiar::NS.new(ns)[var]
+    ns(ns_name)[var]
   end
  
   def self.method_missing(meth, *args, &block)
-    m = self[meth]
-    if m
-      m.invoke(*args)
-    else
-      super
-    end
+    ns(nil).send(meth, *args, &block)
   end
 
   # Make inspect and to_s look right in irb
@@ -178,6 +240,7 @@ module Familiar
   #############################################################################
   # Seqs
 
+  # Create a lazy sequence with the code in the block.
   def self.lazy_seq(&code)
     Java::clojure.lang.LazySeq.new(Familiar.fn(code))
   end
@@ -259,15 +322,13 @@ module Familiar
   #############################################################################
   # REPL
   if $0 != __FILE__
-    Familiar.with do
-      self.require symbol("clojure.repl")
-    end
+    ns("clojure.repl").require
 
     def self.find_doc(s)
-      self["clojure.repl", :find_doc].invoke(s)
+      ns("clojure.repl").find_doc s
     end
 
-    # Print docs for he given string, symbol, etc.
+    # Print docs for the given string, symbol, etc.
     #
     # Examples:
     #
@@ -277,17 +338,13 @@ module Familiar
     #   > Familiar.doc "clojure.repl/source"
     #   ... prints docs for clojure.repl/source ...
     def self.doc(s)
-      self.with do
-        Familiar.eval read_string("(clojure.repl/doc #{s})")
-      end
+      self.eval read_string("(clojure.repl/doc #{s})")
     end
 
     # Same as Familiar.doc, but prints the *source code* for the given
     # input.
     def self.source(s)
-      self.with do
-        Familiar.eval read_string("(clojure.repl/source #{s})")
-      end
+      self.eval read_string("(clojure.repl/source #{s})")
     end
   end
 end
