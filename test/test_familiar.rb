@@ -211,5 +211,61 @@ class FamiliarTest < Test::Unit::TestCase
                                f.keyword("foo"), f.vector(4, 5, 6))).equals(clojure)
   end
 
+  def test_can_convert_a_clojure_keyword_to_ruby_symbol
+    rb = Familiar.keyword("hello").to_ruby
+    assert rb.class == Symbol
+    assert_equal :hello, rb
+  end
+
+  def test_can_convert_a_clojure_vector_to_ruby_array
+    rb = Familiar.vector(5, 6, 7).to_ruby
+    assert rb.class == Array
+    assert_equal [5, 6, 7], rb
+  end
+
+  def test_can_convert_a_clojure_list_to_ruby_array
+    rb = Familiar.list(5, 6, 7).to_ruby
+    assert rb.class == Array
+    assert_equal [5, 6, 7], rb
+  end
+
+  def test_can_convert_a_clojure_seq_to_ruby_array
+    rb = Familiar.range(5).to_ruby
+    assert rb.class == Array
+    assert_equal [0, 1, 2, 3, 4], rb
+  end
+
+  def test_can_convert_a_clojure_array_map_to_ruby_hash
+    rb = Familiar.array_map("hi", "bye", "yum", "bar").to_ruby
+    assert rb.class == Hash
+    assert_equal({"hi" => "bye", "yum" => "bar" }, rb)
+  end
+
+  def test_can_convert_a_clojure_hash_map_to_ruby_hash
+    rb = Familiar.hash_map("hi", "bye", "yum", "bar").to_ruby
+    assert rb.class == Hash
+    assert_equal({"hi" => "bye", "yum" => "bar" }, rb)
+                 
+  end
+
+  def test_can_convert_a_clojure_hash_set_to_ruby_set
+    rb = Familiar.hash_set("a", 4, 1).to_ruby
+    assert rb.class == Set
+    assert_equal Set.new(["a", 1, 4]), rb
+  end
+
+  def test_can_convert_nested_clojure_objects_to_ruby
+    rb = Familiar.with do
+      hash_map(keyword("foo"), "bar",
+               "yum", vector(:yum, 2, 3),
+               99, hash_set("a", "b", keyword("c")))
+    end.to_ruby
+
+    assert rb.class == Hash
+    assert_equal({:foo  => "bar",
+                  "yum" => [:yum, 2, 3],
+                  99    => Set.new(["a", "b", :c])}, rb)
+  end
+
 end
 

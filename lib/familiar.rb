@@ -328,6 +328,10 @@ module Familiar
     v.respond_to?(:to_clojure) ? v.to_clojure : v
   end
 
+  def self.to_ruby(v)
+    v.respond_to?(:to_ruby) ? v.to_ruby : v
+  end
+
   class ::Array
     def to_clojure
       f = Familiar
@@ -355,6 +359,62 @@ module Familiar
   class ::Symbol
     def to_clojure
       Familiar.keyword(to_s)
+    end
+  end
+
+  class Java::ClojureLang::Keyword
+    def to_ruby
+      name.intern
+    end
+  end
+
+  module ListToRuby
+    def to_ruby
+      r = []
+      each do |v|
+        r << Familiar.to_ruby(v)
+      end
+      r
+    end
+  end
+
+  class Java::ClojureLang::PersistentVector
+    include ListToRuby
+  end
+
+  class Java::ClojureLang::PersistentList
+    include ListToRuby
+  end
+
+  class Java::ClojureLang::LazySeq
+    include ListToRuby
+  end
+
+  module MapToRuby 
+    def to_ruby
+      r = {}
+      each do |k,v|
+        r[Familiar.to_ruby(k)] = Familiar.to_ruby(v)
+      end
+      r
+    end
+  end
+
+  class Java::ClojureLang::PersistentArrayMap
+    include MapToRuby
+  end
+
+  class Java::ClojureLang::PersistentHashMap
+    include MapToRuby
+  end
+
+  class Java::ClojureLang::PersistentHashSet
+    def to_ruby
+      r = Set.new
+      each do |v|
+        r.add(Familiar.to_ruby(v))
+      end
+      r
     end
   end
 

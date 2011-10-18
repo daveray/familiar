@@ -60,7 +60,7 @@ So, to inspect the value of a *finite* lazy sequence in IRB, use the `inspect!` 
     => "(0.5428756368923673 0.598041516780956)"
 
 # Type Conversions
-The `to_clojure` method is added to Ruby datastructures so you can easily convert from Ruby literals to Clojure persistent structures. For example, this Ruby code:
+The `to_clojure` method is added to Ruby data structures so you can easily convert from Ruby literals to Clojure persistent structures. For example, this Ruby code:
 
     [[1, 2, 3], {"hi" => "bye", :foo => [4, 5, 6]}].to_clojure
 
@@ -70,6 +70,8 @@ is equivalent to this Clojure code:
     [[1 2 3] {"hi" "bye", :foo [4, 5, 6]}]
 
 Note that Ruby Symbols are converted to Clojure keywords.
+
+Similarly, Clojure data structures can be converted to equivalent, native, data structures using the `to_ruby` method.
 
 # Functions
 Make a function from a proc or lambda:
