@@ -2,7 +2,7 @@
 
 #   The use and distribution terms for this software are covered by the
 #   Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
-#   which can be found in the file epl-v10.html at the root of this 
+#   which can be found in the file epl-v10.html at the root of this
 #   distribution.
 #   By using this software in any fashion, you are agreeing to be bound by
 #   the terms of this license.
@@ -71,7 +71,7 @@ module Familiar
 
   # Returns a Clojure NS by name. When given no argument, returns clojure.core.
   #
-  # This is generally useful because it provides access to Clojure vars 
+  # This is generally useful because it provides access to Clojure vars
   # for when you need to use a Clojure var without invoking it. Combine
   # with NS.[] for this effect.
   #
@@ -105,9 +105,9 @@ module Familiar
   #
   #   [var] => #'clojure.core/var
   #
-  # This is useful if you need to pass an existing Clojure function to a 
+  # This is useful if you need to pass an existing Clojure function to a
   # higher-order function.
-  # 
+  #
   # Note that there's significant overlap with Familiar.ns().
   #
   # Examples:
@@ -143,7 +143,7 @@ module Familiar
     end
     ns(ns_name)[var]
   end
- 
+
   def self.method_missing(meth, *args, &block)
     ns(nil).send(meth, *args, &block)
   end
@@ -185,7 +185,7 @@ module Familiar
   # Run a block of code without having to qualify everything in this module:
   #
   # Examples:
-  # 
+  #
   #   # Here, reduce, fn, range are all from Clojure
   #   Familiar.with do
   #     reduce fn {|acc, x| acc + x}, range(100)
@@ -199,7 +199,7 @@ module Familiar
   # Functions
 
   # Wrap a Proc in a Java Callable
-  class Callable 
+  class Callable
     include Java::java.util.concurrent.Callable
     def initialize(callable)
       @callable = callable
@@ -224,7 +224,7 @@ module Familiar
   # Create a Clojure fn from a block
   #
   # Example:
-  #   
+  #
   #   (fn [x] (+ x 1))
   #
   # is the same as:
@@ -236,7 +236,7 @@ module Familiar
       Fn.new &code
     else
       Fn.new &p
-    end 
+    end
   end
 
   #############################################################################
@@ -255,8 +255,8 @@ module Familiar
   end
 
   class Java::ClojureLang::Atom
-    
-    # Like clojure.core/swap! except block is used as update function 
+
+    # Like clojure.core/swap! except block is used as update function
     def swap!(&code)
       swap(Familiar.fn(code))
     end
@@ -280,8 +280,8 @@ module Familiar
 
     # Like clojure.core/alter except block is used as update function
     def alter(&code)
-      java_send :alter, 
-                [Java::clojure.lang.IFn.java_class, 
+      java_send :alter,
+                [Java::clojure.lang.IFn.java_class,
                  Java::clojure.lang.ISeq.java_class],
                 Familiar.fn(code),
                 nil
@@ -289,8 +289,8 @@ module Familiar
 
     # Like clojure.core/commute except block is used as update function
     def commute(&code)
-      java_send :commute, 
-                [Java::clojure.lang.IFn.java_class, 
+      java_send :commute,
+                [Java::clojure.lang.IFn.java_class,
                  Java::clojure.lang.ISeq.java_class],
                 Familiar.fn(code),
                 nil
@@ -312,7 +312,7 @@ module Familiar
       Familiar.send_off(self, Familiar.fn(code))
     end
   end
-  
+
   #############################################################################
   # Misc
 
@@ -323,7 +323,7 @@ module Familiar
 
   #############################################################################
   # Type conversions
-  
+
   def self.to_clojure(v)
     v.respond_to?(:to_clojure) ? v.to_clojure : v
   end
@@ -342,10 +342,10 @@ module Familiar
   class ::Hash
     def to_clojure
       f = Familiar
-      f.into f.hash_map, map {|k,v| f.vector(f.to_clojure(k), f.to_clojure(v))} 
+      f.into f.hash_map, map {|k,v| f.vector(f.to_clojure(k), f.to_clojure(v))}
     end
   end
-  
+
   class ::Set
     def to_clojure
       r = Familiar.hash_set()
@@ -390,7 +390,7 @@ module Familiar
     include ListToRuby
   end
 
-  module MapToRuby 
+  module MapToRuby
     def to_ruby
       r = {}
       each do |k,v|
