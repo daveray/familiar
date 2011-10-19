@@ -1,3 +1,5 @@
+*NOTE: Clojure STM currently doesn't work due to an interaction between JRuby's exception handling and Clojure's use of exceptions for retry flow control.* [More here](https://jira.codehaus.org/browse/JRUBY-6149).
+
 _My Ruby-meta-fu isn't that strong. In fact, this might be a terrible idea. Suggestions welcome._
 
 Want to use Clojure's persistent, lazy data structures and concurrency primitives, but afraid of parentheses? Try it from Ruby.
