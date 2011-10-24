@@ -6,6 +6,8 @@ Want to use Clojure's persistent, lazy data structures and concurrency primitive
 
 Tested on JRuby 1.6.4 with Clojure 1.3.0.
 
+[Here's an example](https://gist.github.com/1294571) translated from Joy of Clojure with the STM caveat mentioned above.
+
 # Usage
 
     require 'familiar'
