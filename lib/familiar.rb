@@ -10,8 +10,11 @@
 
 require "java"
 require "clojure-1.3.0.jar"
+require "familiar-0.0.0-SNAPSHOT.jar"
 
 require "set"
+
+Java::familiar.FamiliarLibrary.new.load(JRuby.runtime, false)
 
 module Familiar
   # Represents a Clojure namespace. Don't create directly. Use
@@ -272,7 +275,8 @@ module Familiar
 
   # Run a block in an STM transaction
   def self.dosync(&code)
-    Java::clojure.lang.LockingTransaction.runInTransaction(Callable.new(code))
+    Familiar::Ext.dosync &code
+    #Java::clojure.lang.LockingTransaction.runInTransaction(Callable.new(code))
   end
 
   # Add some helpers to refs

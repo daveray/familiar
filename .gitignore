@@ -2,3 +2,10 @@
 *.swp
 *.swo
 .DS_Store
+
+/ext/familiar/pom.xml
+/ext/familiar/*jar
+/ext/familiar/lib/
+/ext/familiar/classes/
+/ext/familiar/.lein-failures
+/ext/familiar/.lein-deps-sum

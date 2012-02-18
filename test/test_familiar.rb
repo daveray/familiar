@@ -149,6 +149,15 @@ class FamiliarTest < Test::Unit::TestCase
     assert_equal Familiar.vector(1, 2, 3, 4), r.deref
   end
 
+  def test_gets_illegal_state_exception_when_modifying_ref_outside_dosync
+    r = Familiar.ref(6)
+    begin
+      r.set 7
+      fail "Expected java.lang.IllegalStateException"
+    rescue java.lang.IllegalStateException
+    end
+  end
+
   def test_can_set_a_refs_value
     r = Familiar.ref(6)
     Familiar.dosync do
